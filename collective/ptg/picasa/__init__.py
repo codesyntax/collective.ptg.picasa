@@ -155,6 +155,7 @@ class PicasaAdapter(BaseAdapter):
         return None
 
     def feed(self):
+        
         gd_client = self.gd_client
 
         try:
@@ -164,12 +165,17 @@ class PicasaAdapter(BaseAdapter):
                 self.sizes[self.settings.size]['width'],
                 self.sizes['thumb']['width']
             )
+            from gdata.photos import AnyFeedFromString
+            from atom.service import AtomService
+            picasa_text = AtomService().Get('%s/return_html_text' % self.request.get('ACTUAL_URL')).read()
+            if picasa_text:
+                my_feed = AnyFeedFromString(picasa_text)
+                return my_feed
             feed = gd_client.GetFeed(url)
             return feed
         except GooglePhotosException, inst:
             #Do not show anything if connection failed
-            self.log_error(
-                GooglePhotosException, inst,
+            self.log_error(GooglePhotosException, inst,
                 "Error getting photo feed")
             return None
 
